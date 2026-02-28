@@ -1,0 +1,17 @@
+# Test URLs — Golf Instruction TikTok / YouTube Shorts
+# One URL per line. Lines starting with # are ignored.
+
+# Me and My Golf
+https://www.tiktok.com/@meandmygolf/video/7291657200840272170
+
+# Chris Ryan Golf
+https://www.tiktok.com/@chrisryangolf/video/7298345621890342186
+
+# Rotary Swing
+https://www.youtube.com/shorts/7JHaHHOTiNA
+
+# Dan Whitaker Golf
+https://www.tiktok.com/@dan_whittaker/video/7306234891234567890
+
+# Rick Shiels Golf
+https://www.youtube.com/shorts/pKE1cVFnHGE
