@@ -21,6 +21,9 @@ CREATE TABLE IF NOT EXISTS golf_drills (
   video_id          text UNIQUE NOT NULL,
   quality_score     integer CHECK (quality_score BETWEEN 1 AND 5),
   tags              text[] DEFAULT '{}',
+  is_professional   boolean DEFAULT false,
+  pro_golfer        text,
+  pro_golfer_slug   text,
   processed_at      timestamptz DEFAULT now(),
   created_at        timestamptz DEFAULT now()
 );
@@ -32,6 +35,9 @@ CREATE INDEX IF NOT EXISTS idx_golf_drills_problem_fixed ON golf_drills USING GI
 CREATE INDEX IF NOT EXISTS idx_golf_drills_tags ON golf_drills USING GIN(tags);
 CREATE INDEX IF NOT EXISTS idx_golf_drills_creator ON golf_drills(creator_handle);
 CREATE INDEX IF NOT EXISTS idx_golf_drills_video_id ON golf_drills(video_id);
+CREATE INDEX IF NOT EXISTS idx_golf_drills_pro_golfer ON golf_drills(pro_golfer);
+CREATE INDEX IF NOT EXISTS idx_golf_drills_pro_golfer_slug ON golf_drills(pro_golfer_slug);
+CREATE INDEX IF NOT EXISTS idx_golf_drills_is_professional ON golf_drills(is_professional);
 
 -- Full text search index
 CREATE INDEX IF NOT EXISTS idx_golf_drills_fts ON golf_drills

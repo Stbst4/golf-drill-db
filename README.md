@@ -38,9 +38,24 @@ cp .env.example .env
 python process_drill.py https://www.tiktok.com/@meandmygolf/video/7123456789
 ```
 
-### Process a batch of URLs
+### Process a batch of URLs (plain text)
 ```bash
 python batch_process.py test_urls.txt
+```
+
+### Process professional golfer videos (JSONL with metadata)
+```bash
+python batch_process.py pro_videos.jsonl
+```
+
+### Filter to a specific pro golfer
+```bash
+python batch_process.py pro_videos.jsonl --golfer "Tiger Woods"
+```
+
+### Only process entries tagged with a pro golfer
+```bash
+python batch_process.py pro_videos.jsonl --pro-only
 ```
 
 ### Dry run (preview without processing)
@@ -51,6 +66,11 @@ python batch_process.py test_urls.txt --dry-run
 ### Control delay between requests
 ```bash
 python batch_process.py urls.txt --delay 5
+```
+
+### Limit number to process
+```bash
+python batch_process.py pro_videos.jsonl --limit 10
 ```
 
 ---
@@ -91,6 +111,9 @@ Processing: https://www.tiktok.com/@meandmygolf/video/7291657200840272170
 | `creator_handle` | Creator's handle (for attribution) |
 | `transcript` | Raw Whisper transcript |
 | `tags` | Searchable tags |
+| `is_professional` | True if pro golfer instruction |
+| `pro_golfer` | Full name (e.g. "Tiger Woods") |
+| `pro_golfer_slug` | URL-safe slug for filtering |
 
 ---
 
@@ -111,8 +134,9 @@ Set `WHISPER_MODEL=small` in `.env` for better accuracy on technical golf termin
 ## Phase Roadmap
 
 - **Phase 1** ✅ — Manual pipeline (single URL, batch)
+- **Phase 1.5** ✅ — Pro golfer lessons (90 videos from 25+ pros with metadata + filtering)
 - **Phase 2** — Auto-discovery (Apify TikTok hashtag scraper, daily cron)
-- **Phase 3** — Search UI (Next.js frontend or baappv1 page)
+- **Phase 3** — Search UI (Next.js frontend or baappv1 page, with pro golfer filter)
 
 ---
 

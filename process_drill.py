@@ -172,7 +172,15 @@ def extract_drill_data(transcript: str) -> dict | None:
     return data
 
 
-def insert_to_supabase(supabase: Client, drill_data: dict, url: str, platform: str, video_id: str, transcript: str) -> dict:
+def slugify(name: str) -> str:
+    """Convert a name to a URL-safe slug."""
+    slug = name.lower().strip()
+    slug = re.sub(r'[^a-z0-9\s-]', '', slug)
+    slug = re.sub(r'[\s]+', '-', slug)
+    return slug
+
+
+def insert_to_supabase(supabase: Client, drill_data: dict, url: str, platform: str, video_id: str, transcript: str, pro_golfer: str | None = None) -> dict:
     """Insert drill record into Supabase."""
     record = {
         "drill_name": drill_data.get("drill_name", "Unnamed Drill"),
@@ -191,16 +199,24 @@ def insert_to_supabase(supabase: Client, drill_data: dict, url: str, platform: s
         "processed_at": datetime.now(timezone.utc).isoformat(),
     }
 
+    # Pro golfer metadata
+    if pro_golfer:
+        record["is_professional"] = True
+        record["pro_golfer"] = pro_golfer
+        record["pro_golfer_slug"] = slugify(pro_golfer)
+
     result = supabase.table("golf_drills").insert(record).execute()
     return result.data[0]
 
 
 # ─── Main ─────────────────────────────────────────────────────────────────────
 
-def process_url(url: str) -> bool:
+def process_url(url: str, pro_golfer: str | None = None) -> bool:
     """Process a single URL through the full pipeline. Returns True on success."""
     print(f"\n{'='*60}")
     print(f"Processing: {url}")
+    if pro_golfer:
+        print(f"  Pro Golfer: {pro_golfer}")
     print('='*60)
 
     supabase = create_client(SUPABASE_URL, SUPABASE_SERVICE_KEY)
@@ -226,9 +242,11 @@ def process_url(url: str) -> bool:
                 return False  # not a drill
 
             # 4. Insert to Supabase
-            record = insert_to_supabase(supabase, drill_data, url, platform, video_id, transcript)
+            record = insert_to_supabase(supabase, drill_data, url, platform, video_id, transcript, pro_golfer=pro_golfer)
             print(f"\n  ✅ Saved: '{record['drill_name']}'")
             print(f"     Category: {record.get('category')} | Level: {record.get('skill_level')}")
+            if pro_golfer:
+                print(f"     Pro: {pro_golfer}")
             print(f"     Problems: {', '.join(record.get('problem_fixed', []))}")
             print(f"     Tags: {', '.join(record.get('tags', []))}")
             return True

@@ -69,9 +69,11 @@ Simple search/browse UI. Could be a page in baappv1 or standalone.
 ### Features
 - Search by problem (e.g., "over-the-top", "fat shots", "putting alignment")
 - Filter by category, skill level, equipment needed
+- **Filter by professional golfer** (Tiger Woods, Phil Mickelson, Rory McIlroy, etc.)
+- **Pro Lessons section** — browse 90+ videos from 25+ professional golfers and elite coaches
 - Save favorites
 - "Drill of the Day" feature
-- Link back to original TikTok
+- Link back to original video
 
 ---
 
@@ -99,6 +101,9 @@ Simple search/browse UI. Could be a page in baappv1 or standalone.
 | processed_at | timestamptz | When we extracted it |
 | quality_score | int | 1-5 (manual rating later) |
 | tags | text[] | searchable tags |
+| is_professional | bool | True if pro golfer instruction |
+| pro_golfer | text | Full name (e.g. "Tiger Woods") |
+| pro_golfer_slug | text | URL-safe (e.g. "tiger-woods") |
 
 ---
 
