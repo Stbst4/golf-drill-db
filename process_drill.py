@@ -33,7 +33,7 @@ ANTHROPIC_API_KEY = os.environ["ANTHROPIC_API_KEY"]
 SUPABASE_URL = os.environ["SUPABASE_URL"]
 SUPABASE_SERVICE_KEY = os.environ["SUPABASE_SERVICE_KEY"]
 WHISPER_MODEL = os.getenv("WHISPER_MODEL", "base")  # tiny, base, small, medium, large
-CLAUDE_MODEL = "claude-3-5-haiku-20241022"  # cheap + fast
+CLAUDE_MODEL = "claude-3-haiku-20240307"  # cheap + fast
 
 EXTRACTION_PROMPT = """You are a golf instruction analyst. Given a transcript from a golf instruction video, extract structured drill data as JSON.
 
@@ -94,6 +94,7 @@ def download_audio(url: str, output_dir: str) -> str:
         "--no-playlist",
         "--quiet",
         "--no-warnings",
+        "--cookies-from-browser", "safari",
         url
     ]
     result = subprocess.run(cmd, capture_output=True, text=True)
@@ -201,12 +202,28 @@ def insert_to_supabase(supabase: Client, drill_data: dict, url: str, platform: s
 
     # Pro golfer metadata
     if pro_golfer:
+        # Store in dedicated columns if they exist (post-migration)
         record["is_professional"] = True
         record["pro_golfer"] = pro_golfer
         record["pro_golfer_slug"] = slugify(pro_golfer)
+        # Also store as tag for pre-migration compatibility
+        if f"pro:{pro_golfer}" not in record["tags"]:
+            record["tags"].append(f"pro:{pro_golfer}")
+        record["creator_name"] = pro_golfer
 
-    result = supabase.table("golf_drills").insert(record).execute()
-    return result.data[0]
+    try:
+        result = supabase.table("golf_drills").insert(record).execute()
+        return result.data[0]
+    except Exception as e:
+        # If insert fails due to missing columns (pre-migration), retry without them
+        if "is_professional" in str(e) or "pro_golfer" in str(e):
+            print("  ⚠ Pro golfer columns not in DB yet — storing in tags only")
+            record.pop("is_professional", None)
+            record.pop("pro_golfer", None)
+            record.pop("pro_golfer_slug", None)
+            result = supabase.table("golf_drills").insert(record).execute()
+            return result.data[0]
+        raise
 
 
 # ─── Main ─────────────────────────────────────────────────────────────────────
